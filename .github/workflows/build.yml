@@ -16,17 +16,30 @@ jobs:
           python-version: '3.10'
 
       - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
         id: setup-ndk
+        uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27d
-          link-to-sdk: true
 
-      - name: Verify NDK
+      - name: Relocate NDK to Versioned Path
         run: |
-          echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
-          ls -la $ANDROID_NDK_HOME
-          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
+          # 定义目标版本化目录
+          TARGET_DIR="/usr/local/lib/android/sdk/ndk/27.3.13750724"
+          
+          # 删除 setup-ndk 创建的软链接（如果存在）
+          sudo rm -rf "$TARGET_DIR"
+          
+          # 将下载的真实 NDK 目录复制到版本化路径
+          sudo cp -r "${{ steps.setup-ndk.outputs.ndk-path }}" "$TARGET_DIR"
+          
+          # 确保权限正确
+          sudo chown -R runner:runner "$TARGET_DIR"
+          
+          # 设置环境变量指向这个真实目录
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$TARGET_DIR" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$TARGET_DIR" >> $GITHUB_ENV
 
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
