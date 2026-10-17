@@ -15,25 +15,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r27d
-
-      - name: Configure NDK Path Structure
-        run: |
-          # 1. 设置 SDK 根目录（GitHub Actions 默认路径）
-          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          # 2. 创建以版本号命名的 ndk 目录
-          mkdir -p /usr/local/lib/android/sdk/ndk
-          # 3. 将已下载的 NDK 链接到正确路径
-          ln -s ${{ steps.setup-ndk.outputs.ndk-path }} /usr/local/lib/android/sdk/ndk/27.3.13750724
-          # 4. 同时设置其他 NDK 环境变量，以确保万无一失
-          echo "ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/27.3.13750724" >> $GITHUB_ENV
-
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
 
