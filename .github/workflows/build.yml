@@ -16,16 +16,17 @@ jobs:
           python-version: '3.10'
 
       - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r27d
+          link-to-sdk: true
+
+      - name: Verify NDK
         run: |
-          # 1. 定义标准路径并写入环境变量
-          echo "ANDROID_SDK_ROOT=$HOME/.android/sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$HOME/.android/sdk" >> $GITHUB_ENV
-          
-          # 2. 使用 sdkmanager 安装指定版本的 NDK
-          echo "y" | $HOME/.android/sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.3.13750724"
-          
-          # 3. 严格按 README 要求，把 NDK 根目录指向 ANDROID_NDK_HOME
-          echo "ANDROID_NDK_HOME=$HOME/.android/sdk/ndk/27.3.13750724" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
+          ls -la $ANDROID_NDK_HOME
+          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
 
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
