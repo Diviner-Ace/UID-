@@ -15,13 +15,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup Build Tools
+      - name: Setup Android NDK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
-
-      - name: Let Build Script Download NDK
-        run: python tools/uid-seccomp-module/build.py ndk
+          # 1. 定义标准路径并写入环境变量
+          echo "ANDROID_SDK_ROOT=$HOME/.android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/.android/sdk" >> $GITHUB_ENV
+          
+          # 2. 使用 sdkmanager 安装指定版本的 NDK
+          echo "y" | $HOME/.android/sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.3.13750724"
+          
+          # 3. 严格按 README 要求，把 NDK 根目录指向 ANDROID_NDK_HOME
+          echo "ANDROID_NDK_HOME=$HOME/.android/sdk/ndk/27.3.13750724" >> $GITHUB_ENV
 
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
