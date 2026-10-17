@@ -16,16 +16,15 @@ jobs:
           python-version: '3.10'
 
       - name: Setup Android SDK and NDK
-        uses: amyu/setup-android@v2
+        uses: amyu/setup-android@v6.0
         with:
           ndk-version: '27.3.13750724'
-          cache-disabled: true # 显式关闭缓存，避免 Cache service 400 错误
+          cache-disabled: true
 
-      - name: Verify NDK Installation
+      - name: Export Android NDK Environment
         run: |
-          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-          echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
-          ls -la $ANDROID_SDK_ROOT/ndk/
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.3.13750724" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/27.3.13750724" >> $GITHUB_ENV
 
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
