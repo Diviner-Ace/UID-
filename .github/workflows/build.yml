@@ -16,11 +16,14 @@ jobs:
           python-version: '3.10'
 
       - name: Setup Android NDK
+        id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27d
 
       - name: Build Module
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: python tools/uid-seccomp-module/build.py --module-only
 
       - name: Upload Artifact
