@@ -15,33 +15,13 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup Android SDK and NDK
+      - name: Setup Build Tools
         run: |
-          # 1. 定义标准 SDK 路径
-          export ANDROID_SDK_ROOT="/usr/local/lib/android/sdk"
-          export ANDROID_HOME="/usr/local/lib/android/sdk"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
 
-          # 2. 使用 sdkmanager 安装指定版本 NDK
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.3.13750724"
-
-          # 3. 关键：设置脚本可能硬编码查找的完整路径
-          export NDK_PATH="$ANDROID_HOME/ndk/27.3.13750724"
-          echo "ANDROID_NDK_HOME=$NDK_PATH" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$NDK_PATH" >> $GITHUB_ENV
-          echo "ANDROID_NDK=$NDK_PATH" >> $GITHUB_ENV
-
-          # 4. 建立软链接，覆盖可能的硬编码路径
-          sudo mkdir -p /usr/local/lib/android/sdk/ndk
-          sudo ln -sfn $NDK_PATH /usr/local/lib/android/sdk/ndk/27.3.13750724
-
-      - name: Verify NDK
-        run: |
-          echo "检查 NDK 目录..."
-          ls -la $ANDROID_NDK_HOME
-          echo "检查 Clang 编译器..."
-          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --version
+      - name: Let Build Script Download NDK
+        run: python tools/uid-seccomp-module/build.py ndk
 
       - name: Build Module
         run: python tools/uid-seccomp-module/build.py --module-only
