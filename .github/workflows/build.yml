@@ -19,6 +19,7 @@ jobs:
         uses: amyu/setup-android@v2
         with:
           ndk-version: '27.3.13750724'
+          cache-disabled: true # 显式关闭缓存，避免 Cache service 400 错误
 
       - name: Verify NDK Installation
         run: |
